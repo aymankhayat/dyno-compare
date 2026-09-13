@@ -13,8 +13,10 @@
 
 export const CHECKED = '2026-09-13';
 
-// Body shapes the 3D showroom can build (js/carmodels.js).
-export const BODY_STYLES = ['sedan', 'liftback', 'coupe', 'fastback', 'hatch', 'suv', 'crossover', 'roadster'];
+// Hand-modeled cars the 3D showroom can build (keys of MODELS in js/carmodels.js).
+// Each car's `dims` (inches) are the maker's published exterior dimensions and
+// size its model; `paint` is only the showroom's starting color.
+export const MODELS_3D = ['gr86', 'supra', 'grcorolla', 'm3', 'p911', 'ioniq5n'];
 
 const toyotaSpecs = (slug, year, model) => ({
   label: `Toyota.com, ${year} ${model} full specifications`,
@@ -27,7 +29,8 @@ export const CARS = [
   // ---------- Toyota GR ----------
   {
     id: 'toyota-gr86', make: 'Toyota', model: 'GR86', short: 'GR86', year: 2027,
-    trim: 'Base, 6-speed manual', family: 'gr86', style: 'coupe',
+    trim: 'Base, 6-speed manual', family: 'gr86',
+    model3d: 'gr86', paint: '#b3121c', dims: { L: 167.9, W: 69.9, H: 51.6, wb: 101.4, clear: 5.1, s: 0, note: 'Wheelbase and ground clearance published in mm (2,575 and 130).' },
     powertrain: 'NA', induction: 'na', drivetrain: 'RWD',
     engine: '2.4L flat-4',
     transmission: '6-speed manual', transType: 'manual',
@@ -40,7 +43,8 @@ export const CARS = [
   },
   {
     id: 'toyota-gr-supra', make: 'Toyota', model: 'GR Supra 3.0', short: 'GR Supra', year: 2026,
-    trim: '3.0, 8-speed automatic', family: 'supra', style: 'coupe',
+    trim: '3.0, 8-speed automatic', family: 'supra',
+    model3d: 'supra', paint: '#e2b93b', dims: { L: 172.5, W: 73.0, H: 51.1, wb: 97.2, clear: 4.7, s: 0 },
     powertrain: 'Turbo', induction: 'turbo', drivetrain: 'RWD',
     engine: '3.0L turbo inline-6',
     transmission: '8-speed automatic', transType: 'auto',
@@ -53,7 +57,8 @@ export const CARS = [
   },
   {
     id: 'toyota-gr-corolla', make: 'Toyota', model: 'GR Corolla', short: 'GR Corolla', year: 2026,
-    trim: 'Core, 6-speed manual', family: 'gr-corolla', style: 'hatch',
+    trim: 'Core, 6-speed manual', family: 'gr-corolla',
+    model3d: 'grcorolla', paint: '#e9ecef', dims: { L: 173.6, W: 72.8, H: 58.2, wb: 103.9, clear: 5.3, s: 0 },
     powertrain: 'Turbo', induction: 'turbo', drivetrain: 'AWD',
     awdNote: 'GR-FOUR: front:rear torque split of 60:40 (Normal), 60:40 to 30:70 (Track), 50:50 (Gravel)',
     engine: '1.6L turbo 3-cyl',
@@ -72,7 +77,8 @@ export const CARS = [
   // ---------- BMW M ----------
   {
     id: 'bmw-m3', make: 'BMW', model: 'M3', short: 'M3', year: 2025,
-    trim: 'Sedan, 6-speed manual', family: 'm3', style: 'sedan',
+    trim: 'Sedan, 6-speed manual', family: 'm3',
+    model3d: 'm3', paint: '#2e6b4f', dims: { L: 189.1, W: 74.3, H: 56.6, wb: 112.5, s: 0 },
     powertrain: 'Turbo', induction: 'turbo', drivetrain: 'RWD',
     engine: '3.0L twin-turbo inline-6',
     transmission: '6-speed manual', transType: 'manual',
@@ -85,7 +91,8 @@ export const CARS = [
   },
   {
     id: 'bmw-m3-competition', make: 'BMW', model: 'M3 Competition', short: 'M3 Comp', year: 2025,
-    trim: 'Competition sedan, rear-wheel drive', family: 'm3', style: 'sedan',
+    trim: 'Competition sedan, rear-wheel drive', family: 'm3',
+    model3d: 'm3', paint: '#2f5ea8', dims: { L: 189.1, W: 74.3, H: 56.6, wb: 112.5, s: 0 },
     powertrain: 'Turbo', induction: 'turbo', drivetrain: 'RWD',
     engine: '3.0L twin-turbo inline-6',
     transmission: '8-speed automatic', transType: 'auto',
@@ -98,7 +105,8 @@ export const CARS = [
   },
   {
     id: 'bmw-m3-competition-xdrive', make: 'BMW', model: 'M3 Competition M xDrive', short: 'M3 Comp xDrive', year: 2025,
-    trim: 'Competition sedan, M xDrive', family: 'm3', style: 'sedan',
+    trim: 'Competition sedan, M xDrive', family: 'm3',
+    model3d: 'm3', paint: '#8e1b2b', dims: { L: 189.1, W: 74.3, H: 56.6, wb: 112.5, s: 0 },
     powertrain: 'Turbo', induction: 'turbo', drivetrain: 'AWD',
     awdNote: 'M xDrive: rear-biased, with 4WD, 4WD Sport and 2WD modes',
     engine: '3.0L twin-turbo inline-6',
@@ -114,7 +122,9 @@ export const CARS = [
   // ---------- Porsche ----------
   {
     id: 'porsche-911-carrera', make: 'Porsche', model: '911 Carrera', short: '911 Carrera', year: 2027,
-    trim: 'Coupe, 8-speed PDK', family: '911', style: 'fastback',
+    trim: 'Coupe, 8-speed PDK', family: '911',
+    model3d: 'p911', paint: '#c9c2b4',
+    dims: { L: 178.8, W: 72.9, H: 51.1, wb: 96.5, s: 0, note: 'Length, width and wheelbase from Porsche’s technical data; Porsche’s US page lists no height, so the model uses a provisional 51.1 in.' },
     powertrain: 'Turbo', induction: 'turbo', drivetrain: 'RWD',
     engine: '3.0L twin-turbo flat-6',
     transmission: '8-speed PDK (dual-clutch)', transType: 'dct',
@@ -130,7 +140,9 @@ export const CARS = [
   },
   {
     id: 'porsche-911-carrera-gts', make: 'Porsche', model: '911 Carrera GTS T-Hybrid', short: '911 GTS T-Hybrid', year: 2027,
-    trim: 'Coupe, 8-speed PDK', family: '911', style: 'fastback',
+    trim: 'Coupe, 8-speed PDK', family: '911',
+    model3d: 'p911', paint: '#d9531e',
+    dims: { L: 179.3, W: 72.9, H: 51.1, wb: 96.5, s: 0, note: 'Length, width and wheelbase from Porsche’s technical data; Porsche’s US page lists no height, so the model uses a provisional 51.1 in.' },
     powertrain: 'Hybrid', induction: 'turbo', drivetrain: 'RWD',
     engine: '3.6L flat-6 with electric turbocharger, plus a motor in the PDK',
     transmission: '8-speed PDK with integrated electric motor', transType: 'dct',
@@ -152,7 +164,8 @@ export const CARS = [
   // ---------- Hyundai N ----------
   {
     id: 'hyundai-ioniq-5-n', make: 'Hyundai', model: 'IONIQ 5 N', short: 'IONIQ 5 N', year: 2026,
-    trim: 'Dual motor, all-wheel drive', family: 'ioniq5n', style: 'crossover',
+    trim: 'Dual motor, all-wheel drive', family: 'ioniq5n',
+    model3d: 'ioniq5n', paint: '#3e5f8f', dims: { L: 185.6, W: 76.4, H: 62.4, wb: 118.1, s: 0 },
     powertrain: 'EV', induction: null, drivetrain: 'AWD',
     engine: 'Dual motor, 84 kWh, 697 V',
     transmission: 'Single-speed reduction (simulated shifts available)', transType: 'single',

@@ -69,7 +69,6 @@
       <div class="callout glass" id="callout" role="dialog" aria-modal="false" hidden></div>
 
       <div class="stage-bar">
-        <div class="paint" role="group" aria-label="Paint color" id="paint"></div>
         <button type="button" class="chip" id="reset-view">Show all cars</button>
         <p class="hint" id="stage-hint">Drag to rotate. Tap a car’s name to inspect it.</p>
       </div>
@@ -151,7 +150,7 @@
           <h3>What it demonstrates</h3>
           <ul>
             <li>Data integrity: every figure links to the manufacturer document it came from, and the lineup only includes cars whose makers publish every figure shown.</li>
-            <li>A 3D showroom built from code with three.js: body shapes generated from side profiles, orbit controls, spec hotspots and live paint changes.</li>
+            <li>A 3D showroom built from code with three.js: each car modeled by hand from its own silhouette and sized from its published dimensions, with its signature details (the 911’s round headlights and light bar, the M3’s kidney grille, the GR Corolla’s three exhausts, the IONIQ 5 N’s pixel lights), plus orbit controls and spec hotspots.</li>
             <li>Explanations generated from the cars being compared, so they quote this comparison’s own numbers.</li>
             <li>Unit conversions checked by automated tests against reference values (60&nbsp;mph = 96.6&nbsp;km/h, 300&nbsp;hp = 224&nbsp;kW).</li>
             <li>Shareable state: the address bar always links to the exact comparison on screen.</li>
@@ -162,7 +161,7 @@
   </main>
 
   <footer class="footer">
-    <p>Specs last checked <time data-checked></time>. US-market models; figures are the manufacturers’ own, stored in US units and converted to metric in the browser. The 3D models are stylized body shapes, not replicas, and not to scale.</p>
+    <p>Specs last checked <time data-checked></time>. US-market models; figures are the manufacturers’ own, stored in US units and converted to metric in the browser. Each 3D model is hand-traced from the car’s silhouette and sized from the maker’s published length, width, height and wheelbase, so the cars are to scale with one another. They’re close approximations, not official models.</p>
     <p><a href="tests.html">Run the unit and data tests</a></p>
   </footer>
 </body>

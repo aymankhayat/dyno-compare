@@ -125,7 +125,7 @@ export function createStage({ canvas, overlay, onHotspot, onFocus }) {
     cars.forEach(({ car }) => { scene.remove(car.group); car.dispose(); });
     const n = entries.length;
     cars = entries.map((entry, i) => {
-      const car = buildCar(entry.style, { paint: entry.paint, accent: entry.accent });
+      const car = buildCar(entry.model, { dims: entry.dims, paint: entry.paint, accent: entry.accent });
       const z = slotZ(i, n);
       car.group.position.set(0, 0, z);
       scene.add(car.group);

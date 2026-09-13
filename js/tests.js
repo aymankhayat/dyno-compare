@@ -1,6 +1,6 @@
 // Browser-run tests: open tests.html. Results are also exposed on window.__TESTS__.
 import * as U from './units.js';
-import { CARS, CAR_BY_ID, SIGNATURES, CHECKED, BODY_STYLES } from './data.js';
+import { CARS, CAR_BY_ID, SIGNATURES, CHECKED, MODELS_3D } from './data.js';
 import { parseState, serializeState, matchSignature, defaultCars } from './state.js';
 import { SCALES } from './gauges.js';
 import { buildTradeoffs } from './tradeoffs.js';
@@ -82,8 +82,14 @@ test('No figure in the lineup is unverified or blank', () => {
     for (const key of ['hp', 'torque', 'weight', 'zero60', 'top']) ok(c[key].v != null, `${c.id}.${key} is blank`);
   }
 });
-test('Every car has a 3D body style the showroom can build', () => {
-  for (const c of CARS) ok(BODY_STYLES.includes(c.style), `${c.id}: ${c.style}`);
+test('Every car has a 3D model sized from published dimensions', () => {
+  for (const c of CARS) {
+    ok(MODELS_3D.includes(c.model3d), `${c.id}: model ${c.model3d}`);
+    const d = c.dims;
+    ok(d && d.L > d.wb && d.W > 60 && d.W < 90 && d.H > 40 && d.H < 80, `${c.id}: implausible dimensions`);
+    ok(Number.isInteger(d.s) && c.sources[d.s], `${c.id}: dimensions have no source`);
+    ok(/^#[0-9a-f]{6}$/i.test(c.paint), `${c.id}: paint`);
+  }
 });
 test('Every signature run has a wordmark', () => {
   for (const s of SIGNATURES) ok(typeof s.word === 'string' && s.word.length > 0, s.id);

@@ -8,7 +8,7 @@ A 3D showroom for comparing performance cars side by side: drag the cars around,
 
 ## Features
 
-- **3D showroom built in code:** three.js cars generated from side-profile body shapes, on a studio floor. Drag to orbit, a drive-in animation when the lineup changes, paint swatches, and spec hotspots pinned to each model.
+- **3D showroom built in code:** every car is modeled by hand in three.js from its own silhouette and sized from the maker's published length, width, height and wheelbase, so the lineup is to scale. Each model carries its signature details: the 911's round headlights and full-width light bar, the M3's kidney grille, the GR Corolla's roof wing and three exhaust tips, and the IONIQ 5 N's pixel lights. Each car is shown in its own standout color. Drag to orbit, watch the drive-in animation when the lineup changes, and tap spec hotspots pinned to each model.
 - **Three signature runs** load first, each isolating one trade-off:
   - **Hybrid vs gas:** Porsche 911 Carrera vs 911 Carrera GTS T-Hybrid. An electric turbo and a PDK-integrated motor used to kill turbo lag, contrasted with Toyota's power-split hybrid system from a hybrid-diagnostics point of view.
   - **Turbo vs naturally aspirated:** Toyota GR86 vs GR Supra 3.0.
@@ -47,6 +47,6 @@ Open `http://localhost:3000`, and `/tests.html` to run the tests in the browser.
 
 ## About
 
-Built by [Ayman Khayat](https://www.linkedin.com/in/ayman-khayat-350b4b335), a mechanical engineering student, drawing on a Toyota dealership internship in hybrid powertrain diagnostics. The 3D cars are stylized body shapes, not replicas of any manufacturer's design.
+Built by [Ayman Khayat](https://www.linkedin.com/in/ayman-khayat-350b4b335), a mechanical engineering student, drawing on a Toyota dealership internship in hybrid powertrain diagnostics. The 3D cars are hand-built approximations of each model's shape, not official manufacturer models.
 
 MIT licensed.

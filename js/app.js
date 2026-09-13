@@ -7,16 +7,6 @@ import { convert, format, unit, powerToWeight, weightPerPower, averageG, round }
 const state = parseState(location.search);
 const LETTERS = ['A', 'B', 'C'];
 const ACCENTS = ['#6cf0c2', '#5ab8ff', '#ff7a9a'];
-const PAINTS = [
-  { name: 'Glacier mint', hex: '#a6dccd' },
-  { name: 'Pearl white', hex: '#e6e9ec' },
-  { name: 'Graphite', hex: '#3b4249' },
-  { name: 'Obsidian', hex: '#121518' },
-  { name: 'Race red', hex: '#b1202b' },
-  { name: 'Electric blue', hex: '#2a62d6' },
-  { name: 'Sunburst', hex: '#e0a02c' },
-];
-const paints = ['#a6dccd', '#3b4249', '#e6e9ec'];
 const DRIVE_NAMES = { AWD: 'All-wheel drive', RWD: 'Rear-wheel drive', FWD: 'Front-wheel drive' };
 const TRANS_BLURB = {
   manual: 'Three pedals. Every shift interrupts drive, which costs time off the line but keeps the driver in charge of rpm.',
@@ -106,16 +96,6 @@ function renderStageCard() {
     </ul>`;
 }
 
-function paintTarget() { return focusedCar >= 0 ? focusedCar : 0; }
-
-function renderPaint() {
-  const i = paintTarget();
-  const c = cars()[i];
-  $('#paint').innerHTML = `<span class="paint-label">Paint, ${c.short}</span>${PAINTS.map((p) => `
-    <button type="button" class="swatch" style="--c:${p.hex}" data-paint="${p.hex}"
-      aria-label="${p.name}" title="${p.name}" aria-pressed="${paints[i] === p.hex}"></button>`).join('')}`;
-}
-
 function syncStage() {
   if (!stage) return;
   const key = state.cars.join(',');
@@ -123,8 +103,9 @@ function syncStage() {
   stageKey = key;
   stage.setCars(cars().map((c, i) => ({
     name: c.short,
-    style: c.style,
-    paint: paints[i],
+    model: c.model3d,
+    dims: c.dims,
+    paint: c.paint,
     accent: ACCENTS[i],
     hotspots: [
       { anchor: 'powertrain', label: c.powertrain === 'EV' ? 'Motors' : 'Engine' },
@@ -202,7 +183,7 @@ async function initStage() {
   const fail = () => {
     canvas.hidden = true;
     $('#stage-fallback').hidden = false;
-    ['#stage-hint', '#reset-view', '#paint'].forEach((s) => { $(s).hidden = true; });
+    ['#stage-hint', '#reset-view'].forEach((s) => { $(s).hidden = true; });
   };
   try {
     const mod = await import('./stage3d.js');
@@ -215,7 +196,6 @@ async function initStage() {
         focusedCar = i;
         closeCallout();
         renderStageCard();
-        renderPaint();
       },
     });
     syncStage();
@@ -447,7 +427,6 @@ function renderAll({ sweep = false } = {}) {
   renderTradeoffs();
   syncStage();
   renderStageCard();
-  renderPaint();
   document.title = `${cars().map((c) => c.short).join(' vs ')} | Dyno Compare`;
 }
 
@@ -466,14 +445,6 @@ document.addEventListener('click', (e) => {
     state.cars = SIGNATURES.find((s) => s.id === run.dataset.run).cars.slice();
     commit({ sweep: true });
     if (window.scrollY > 200) $('#top').scrollIntoView({ block: 'start' });
-    return;
-  }
-  const sw = e.target.closest('[data-paint]');
-  if (sw) {
-    const i = paintTarget();
-    paints[i] = sw.dataset.paint;
-    stage?.setPaint(i, paints[i]);
-    renderPaint();
     return;
   }
   const u = e.target.closest('[data-units]');
