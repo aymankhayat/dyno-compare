@@ -47,15 +47,28 @@ export function createGauge(host, { slots = 3 } = {}) {
 
   const defs = svgEl('defs', {}, svg);
   const ring = svgEl('linearGradient', { id: `${id}-ring`, x1: 0, y1: 0, x2: 0, y2: 1 }, defs);
-  svgEl('stop', { offset: 0, 'stop-color': '#6a737c' }, ring);
-  svgEl('stop', { offset: 0.45, 'stop-color': '#262b31' }, ring);
-  svgEl('stop', { offset: 1, 'stop-color': '#4a525a' }, ring);
-  const face = svgEl('radialGradient', { id: `${id}-face`, cx: 0.5, cy: 0.4, r: 0.65 }, defs);
-  svgEl('stop', { offset: 0, 'stop-color': '#20262c' }, face);
-  svgEl('stop', { offset: 1, 'stop-color': '#0b0e11' }, face);
+  svgEl('stop', { offset: 0, 'stop-color': '#3c4a50' }, ring);
+  svgEl('stop', { offset: 0.45, 'stop-color': '#11171c' }, ring);
+  svgEl('stop', { offset: 1, 'stop-color': '#2b373d' }, ring);
+  const face = svgEl('radialGradient', { id: `${id}-face`, cx: 0.5, cy: 0.38, r: 0.66 }, defs);
+  svgEl('stop', { offset: 0, 'stop-color': '#12202a' }, face);
+  svgEl('stop', { offset: 1, 'stop-color': '#05080b' }, face);
 
   svgEl('circle', { cx: CX, cy: CY, r: 98, fill: `url(#${id}-ring)` }, svg);
   svgEl('circle', { cx: CX, cy: CY, r: 93, fill: `url(#${id}-face)` }, svg);
+
+  // One glowing value arc per car, drawn as a dash along a full-sweep path.
+  const arcs = [];
+  for (let i = 0; i < slots; i++) {
+    const rr = 89 - i * 3.2;
+    const [sx, sy] = polar(rr, START);
+    const [ex, ey] = polar(rr, START + SWEEP);
+    const a = svgEl('path', {
+      d: `M${sx} ${sy} A${rr} ${rr} 0 1 1 ${ex} ${ey}`,
+      pathLength: 100, class: `arc a${i}`, 'stroke-dasharray': '0 100',
+    }, svg);
+    arcs.push(a);
+  }
   const scale = svgEl('g', { class: 'dial-scale' }, svg);
   const unitText = svgEl('text', { x: CX, y: 142, class: 'dial-unit', 'text-anchor': 'middle' }, svg);
 
@@ -114,10 +127,17 @@ export function createGauge(host, { slots = 3 } = {}) {
       n.classList.toggle('dashed', Boolean(d && d.dashed));
     });
 
-    const settle = () => needles.forEach((n, i) => {
-      const d = data[i];
-      if (d && d.value != null) setNeedle(n, angleFor(d.value, sc.max));
-    });
+    const settle = () => {
+      needles.forEach((n, i) => {
+        const d = data[i];
+        if (d && d.value != null) setNeedle(n, angleFor(d.value, sc.max));
+      });
+      arcs.forEach((a, i) => {
+        const d = data[i];
+        const f = d && d.value != null ? Math.max(0, Math.min(1, d.value / sc.max)) : 0;
+        a.setAttribute('stroke-dasharray', `${(f * 100).toFixed(2)} 100`);
+      });
+    };
 
     if (sweep) {
       // Ignition self-test: needles sweep to the stop and fall back to their readings.

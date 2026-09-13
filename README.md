@@ -1,79 +1,52 @@
 # Dyno Compare
 
-Compare two or three cars side by side on a dashboard-style instrument cluster, read the raw numbers on a dyno-printout spec sheet, and get a plain-language explanation of the engineering trade-offs behind them.
+A 3D showroom for comparing performance cars side by side: drag the cars around, tap spec hotspots, read every figure on a spec sheet that links to its manufacturer source, and get a plain-language explanation of the engineering trade-offs behind the numbers.
 
-**[Live Demo](DEMO_LINK_PLACEHOLDER)**
+**[Live Demo](https://aymankhayat.github.io/dyno-compare/)**
 
 ![Screenshot](docs/screenshot.png)
 
-Every figure comes from a manufacturer document and links to it. Where a maker doesn't publish a number, the site shows **unverified** instead of estimating one.
+## Features
 
-## What's on the page
-
+- **3D showroom built in code:** three.js cars generated from side-profile body shapes, on a studio floor. Drag to orbit, a drive-in animation when the lineup changes, paint swatches, and spec hotspots pinned to each model.
 - **Three signature runs** load first, each isolating one trade-off:
-  - **Hybrid vs gas:** Toyota Prius vs Honda Civic Sport Hybrid vs Honda Civic Sport. Toyota's power-split e-CVT, Honda's two-motor system, and the gas car both are measured against. The write-up covers regenerative-brake blending, what "e-CVT" means mechanically, and battery management, from a hybrid-diagnostics point of view.
-  - **Turbo vs naturally aspirated:** Toyota GR86 vs GR Supra 3.0. A flat turbo torque plateau from 1,800 rpm against an engine that has to rev.
-  - **AWD vs RWD:** BMW M3 Competition vs M3 Competition M xDrive. Same engine and gearbox; the drivetrain is the variable.
-- **Pick any 2 or 3 cars** from 18 current US-market models (Toyota-heavy, plus performance and EV benchmarks).
-- **Radial gauges** for peak power, peak torque and 0–60, one needle per car on a shared dial.
+  - **Hybrid vs gas:** Porsche 911 Carrera vs 911 Carrera GTS T-Hybrid. An electric turbo and a PDK-integrated motor used to kill turbo lag, contrasted with Toyota's power-split hybrid system from a hybrid-diagnostics point of view.
+  - **Turbo vs naturally aspirated:** Toyota GR86 vs GR Supra 3.0.
+  - **AWD vs RWD:** BMW M3 Competition vs M3 Competition M xDrive.
+- **Pick any 2 or 3 cars** from 9 current US-market performance cars (Toyota GR, BMW M, Porsche 911, Hyundai IONIQ 5 N).
+- **Instrument cluster:** radial gauges for power, torque and 0–60, with one needle and glowing arc per car.
 - **Units toggle:** imperial (mph, hp, lb, lb-ft) or metric (km/h, kW, kg, N·m).
-- **Explain the trade-offs toggle:** on shows the generated explanations; off leaves the gauges and raw spec sheet.
-- **Shareable links:** the URL always encodes the comparison on screen, e.g.
-  `?cars=toyota-gr86,toyota-gr-supra&units=metric`
-- **Mobile-first layout:** gauges stack into compact rows and the spec sheet reflows to one car per column.
+- **Explain the trade-offs toggle:** turns the generated explanations on or off.
+- **Shareable links:** the URL always encodes the comparison on screen, e.g. `?cars=toyota-gr86,toyota-gr-supra&units=metric`.
+- **Mobile layout:** compact gauge rows, a swipeable run carousel, and opt-in rotation so the 3D stage never traps page scrolling.
 
 ## Tech stack
 
-Plain HTML, CSS and JavaScript (ES modules), with no framework, build step or runtime dependencies. Gauges are hand-built SVG. Fonts are Barlow and Barlow Condensed from Google Fonts. The site is hosted on GitHub Pages.
+Plain HTML, CSS and JavaScript (ES modules), with no build step. three.js 0.186 is loaded from jsDelivr through an import map, and the 3D stage loads lazily, so the rest of the page works even without WebGL. Gauges are hand-built SVG. Fonts are Unbounded, Barlow and Barlow Condensed. The site is hosted on GitHub Pages.
 
 ## Data methodology
 
-- **Market and years:** US-spec, the latest model year each manufacturer lists (2025–2027).
-- **Sources:** Toyota.com full specification pages, Honda News spec releases, BMW Group PressClub USA, MazdaUSA.com, Ford.com and Ford's technical specifications, HyundaiUSA.com. Every value in [`js/data.js`](js/data.js) carries an index into that car's source list, and the tests fail if one doesn't.
-- **0–60 times** are manufacturer claims and are labeled that way. Many makers (Honda, Mazda, Ford, and Toyota for most non-GR models) don't publish one; those show as unverified rather than borrowing a magazine figure.
-- **Torque on electrified cars** is shown as published and marked: Toyota publishes engine-only torque for its hybrids, Honda publishes traction-motor torque, and Toyota lists the bZ's two motors separately. Those needles are dashed, and nothing is summed that wasn't meant to be.
-- **Two caveats, stated in the UI too:** Toyota's pressroom and Ford's spec PDF block automated reading, so the bZ 0–60 claim and the Mustang curb weights were read from those documents' search-indexed text.
-- **Last checked:** 13 September 2026 (the `CHECKED` constant, shown in the header and footer).
+- **Only complete cars.** The lineup only includes cars whose makers publish every figure shown: 0–60, top speed, power, torque and curb weight. The tests fail if any figure is blank.
+- **Sources:** Toyota.com full specification pages, BMW Group PressClub USA, Porsche USA technical data and Porsche Newsroom, HyundaiUSA.com and Hyundai Newsroom. Every value in [`js/data.js`](js/data.js) carries an index into that car's source list, and the spec sheet links to it.
+- **0–60 times are manufacturer claims** and are labeled that way. Two are quoted rather than read from a spec page: the GR Corolla's 4.9 s is Toyota's claim as quoted by Edmunds, and the IONIQ 5 N's top speed comes from Hyundai's launch release.
+- **Last checked:** 13 September 2026, shown on the site.
 
 ## Unit conversions
 
-All data is stored in US units exactly as published and converted in one place, [`js/units.js`](js/units.js):
+All data is stored in US units exactly as published and converted in one place, [`js/units.js`](js/units.js): mph → km/h × 1.609344, hp → kW × 0.745699872, lb → kg × 0.45359237, lb-ft → N·m × 1.3558179483. The test page checks **60 mph = 96.6 km/h** and **300 hp = 224 kW**, and cross-checks derived figures against ones Toyota publishes itself.
 
-| Conversion | Factor |
-| --- | --- |
-| mph → km/h | × 1.609344 (exact) |
-| hp → kW | × 0.745699872 (mechanical/SAE hp) |
-| lb → kg | × 0.45359237 (exact) |
-| lb-ft → N·m | × 1.3558179483 |
+## Getting started
 
-The test page checks these against reference values: **60 mph = 96.6 km/h** and **300 hp = 224 kW**. It also cross-checks derived figures against numbers Toyota publishes itself (GR Supra 8.89 lb/hp; GR Corolla 0.091 hp/lb).
-
-## Run it locally
-
-It's a static site with no build step and no dependencies. Serve the folder with any static server (ES modules don't load from `file://`):
+There's no install and no build. Serve the folder with any static server, since ES modules don't load from `file://`:
 
 ```bash
 npx serve .
 ```
 
-Then open `http://localhost:3000`. Open `/tests.html` to run the tests in the browser.
-
-## Project structure
-
-```
-index.html        page shell
-css/styles.css    cockpit + dyno-paper styling
-js/data.js        18 cars, per-figure sources, signature runs, CHECKED date
-js/units.js       conversions and derived figures (power-to-weight, average g)
-js/state.js       URL <-> state
-js/gauges.js      SVG instrument gauges
-js/tradeoffs.js   explanation generator + signature essays
-js/app.js         rendering and controls
-tests.html        browser test runner (js/tests.js)
-```
+Open `http://localhost:3000`, and `/tests.html` to run the tests in the browser. No environment variables are needed.
 
 ## About
 
-Built by [Ayman Khayat](https://www.linkedin.com/in/ayman-khayat-350b4b335), mechanical engineering student, drawing on a Toyota dealership internship in hybrid powertrain diagnostics.
+Built by [Ayman Khayat](https://www.linkedin.com/in/ayman-khayat-350b4b335), a mechanical engineering student, drawing on a Toyota dealership internship in hybrid powertrain diagnostics. The 3D cars are stylized body shapes, not replicas of any manufacturer's design.
 
 MIT licensed.

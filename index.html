@@ -2,76 +2,122 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Dyno Compare</title>
-  <meta name="description" content="Compare two or three cars side by side with manufacturer-verified specs, dashboard gauges and plain-language engineering trade-offs.">
-  <meta name="theme-color" content="#1a1e23">
+  <meta name="description" content="A 3D showroom for comparing performance cars side by side: manufacturer-published specs, dashboard gauges and plain-language engineering trade-offs.">
+  <meta name="theme-color" content="#07090c">
   <meta property="og:title" content="Dyno Compare">
-  <meta property="og:description" content="Side-by-side car specs from manufacturer documents, with the engineering that explains them: turbo vs NA, AWD vs RWD, hybrid vs gas.">
+  <meta property="og:description" content="Compare performance cars in a 3D showroom, with manufacturer-published specs and the engineering behind them: turbo vs NA, AWD vs RWD, hybrid vs gas.">
   <meta property="og:type" content="website">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%2314181c' stroke='%236a737c' stroke-width='2'/%3E%3Cpath d='M16 16 L24 9' stroke='%23ffb020' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%236a737c'/%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%2307090c' stroke='%236cf0c2' stroke-width='2'/%3E%3Cpath d='M16 16 L24 9' stroke='%236cf0c2' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.0/examples/jsm/"
+      }
+    }
+  </script>
   <script type="module" src="js/app.js"></script>
 </head>
 <body>
-  <a class="skip" href="#bench">Skip to the comparison</a>
+  <a class="skip" href="#picker">Skip to the car picker</a>
 
-  <header class="topbar">
-    <div class="brand">
-      <p class="wordmark"><span class="wm-dial" aria-hidden="true"></span>Dyno Compare</p>
-      <p class="checked">Specs last checked <time data-checked></time></p>
-    </div>
-    <div class="controls">
+  <header class="nav">
+    <a class="brand" href="#top" aria-label="Dyno Compare, back to top">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-name">Dyno<span>Compare</span></span>
+    </a>
+    <nav class="nav-links" aria-label="Sections">
+      <a href="#runs">Runs</a>
+      <a href="#cluster">Cluster</a>
+      <a href="#specs">Specs</a>
+      <a href="#tradeoffs">Trade-offs</a>
+      <a href="#about">About</a>
+    </nav>
+    <div class="nav-tools">
       <div class="units" role="group" aria-label="Units">
-        <button type="button" data-units="imperial" aria-pressed="true">Imperial<small>mph, hp, lb</small></button>
-        <button type="button" data-units="metric" aria-pressed="false">Metric<small>km/h, kW, kg</small></button>
+        <button type="button" data-units="imperial" aria-pressed="true">mph</button>
+        <button type="button" data-units="metric" aria-pressed="false">km/h</button>
       </div>
-      <label class="switch">
+      <label class="switch" title="Explain the trade-offs">
         <input type="checkbox" id="explain" checked>
         <span class="track" aria-hidden="true"></span>
-        <span>Explain the trade-offs</span>
+        <span class="switch-label">Explain the trade-offs</span>
       </label>
     </div>
   </header>
 
-  <main>
-    <section class="intro" aria-labelledby="runs-h">
-      <h1 id="runs-h">Three runs, three engineering trade-offs</h1>
-      <p class="intro-lede">Every number here comes from a manufacturer document, and every comparison explains why the numbers come out the way they do. Start with a signature run, or pick your own cars below.</p>
-      <div class="runs" id="runs"></div>
+  <main id="top">
+    <section class="stage" aria-labelledby="stage-title">
+      <p class="wordmark" id="wordmark" aria-hidden="true"></p>
+      <canvas id="stage-canvas" role="img" aria-label="3D models of the cars being compared. Drag to rotate."></canvas>
+      <div class="stage-overlay" id="stage-overlay"></div>
+
+      <div class="stage-copy">
+        <p class="kicker" id="stage-kicker">Signature run</p>
+        <h1 id="stage-title">Dyno Compare</h1>
+        <p class="stage-hook" id="stage-hook"></p>
+      </div>
+
+      <aside class="stage-card glass" id="stage-card" aria-live="polite"></aside>
+
+      <div class="callout glass" id="callout" role="dialog" aria-modal="false" hidden></div>
+
+      <div class="stage-bar">
+        <div class="paint" role="group" aria-label="Paint color" id="paint"></div>
+        <button type="button" class="chip" id="reset-view">Show all cars</button>
+        <p class="hint" id="stage-hint">Drag to rotate. Tap a car’s name to inspect it.</p>
+      </div>
+      <p class="stage-fallback" id="stage-fallback" hidden>The 3D showroom needs WebGL, which this browser has turned off. Everything else on the page works.</p>
     </section>
 
-    <section class="bench" id="bench" aria-label="Comparison">
-      <div class="slots" id="slots"></div>
+    <section class="runs-sec" id="runs" aria-labelledby="runs-h">
+      <h2 id="runs-h" class="sr-only">Signature runs</h2>
+      <div class="runs" id="runs-list"></div>
+    </section>
 
-      <div class="cluster" aria-label="Instrument cluster">
+    <section class="picker" id="picker" aria-labelledby="picker-h">
+      <div class="section-head">
+        <h2 id="picker-h">Build your own comparison</h2>
+        <p>Pick two or three cars. The showroom, gauges, spec sheet and trade-offs all follow.</p>
+      </div>
+      <div class="slots glass" id="slots"></div>
+      <div class="share-row">
+        <button type="button" id="share" class="share">Copy link to this comparison</button>
+        <span id="share-status" class="share-status" role="status" aria-live="polite"></span>
+        <span class="checked">Specs last checked <time data-checked></time></span>
+      </div>
+    </section>
+
+    <section class="cluster-sec" id="cluster" aria-labelledby="cluster-h">
+      <div class="section-head">
+        <h2 id="cluster-h">Instrument cluster</h2>
+        <p>One needle per car on a shared dial. Dashed needles mark torque the maker publishes differently.</p>
+      </div>
+      <div class="cluster" aria-label="Gauges">
         <div class="gauge" id="g-power"></div>
         <div class="gauge" id="g-torque"></div>
         <div class="gauge" id="g-time"></div>
       </div>
-
-      <div class="share-row">
-        <button type="button" id="share" class="share">Copy link to this comparison</button>
-        <span id="share-status" class="share-status" role="status" aria-live="polite"></span>
-      </div>
     </section>
 
-    <section class="printout" aria-labelledby="sheet-h">
-      <h2 id="sheet-h">Spec sheet</h2>
-      <div class="paper">
-        <div class="paper-head">
-          <span>Figures as published by each manufacturer</span>
-          <span>Checked <time data-checked></time></span>
-        </div>
+    <section class="specs" id="specs" aria-labelledby="sheet-h">
+      <div class="section-head">
+        <h2 id="sheet-h">Spec sheet</h2>
+        <p>Every figure as the manufacturer publishes it, with a numbered link to the source.</p>
+      </div>
+      <div class="hud glass">
         <div class="sheet-wrap">
           <table class="sheet" id="sheet"></table>
         </div>
         <div class="legend">
-          <span><span class="stamp">unverified</span> The figure couldn’t be confirmed from a manufacturer source, so none is shown.</span>
-          <span><span class="tag">maker claim</span> A performance claim by the manufacturer, not an independent test.</span>
+          <span><span class="tag">maker claim</span> A performance figure published by the manufacturer, not an independent test.</span>
+          <span><span class="best-mark">best</span> Best in this comparison.</span>
         </div>
         <details class="sources-box">
           <summary>Sources for every figure</summary>
@@ -81,37 +127,42 @@
     </section>
 
     <section class="tradeoffs" id="tradeoffs" aria-labelledby="tradeoffs-h">
-      <h2 id="tradeoffs-h">The engineering trade-offs</h2>
-      <p class="section-lede">Written from the specs above. Change a car or the units and these update.</p>
+      <div class="section-head">
+        <h2 id="tradeoffs-h">The engineering trade-offs</h2>
+        <p>Written from the specs above. Change a car or the units and these update.</p>
+      </div>
       <div id="tradeoff-list"></div>
     </section>
 
-    <section class="about" aria-labelledby="about-h">
-      <h2 id="about-h">About this project</h2>
+    <section class="about" id="about" aria-labelledby="about-h">
+      <div class="section-head">
+        <h2 id="about-h">About this project</h2>
+      </div>
       <div class="about-grid">
-        <div>
+        <div class="glass about-card">
           <p>I’m Ayman Khayat, a mechanical engineering student. During an internship at a Toyota dealership I worked on hybrid powertrain diagnostics, which is where the hybrid write-up on this page comes from: regenerative braking, e-CVT behavior and battery management are what you see from the service bay, not from the brochure.</p>
           <p>Spec sheets tell you what a car makes. They rarely tell you why two cars with similar numbers drive so differently. I built this to put the numbers next to the reasons.</p>
-        </div>
-        <div>
-          <h3>What it demonstrates</h3>
-          <ul>
-            <li>Data integrity: each figure links to the manufacturer document it came from. Where a maker doesn’t publish a figure, the page says “unverified” instead of estimating one.</li>
-            <li>Explanations generated from the cars being compared, so they quote this comparison’s own numbers.</li>
-            <li>Unit conversions checked by automated tests against reference values (60&nbsp;mph = 96.6&nbsp;km/h, 300&nbsp;hp = 224&nbsp;kW).</li>
-            <li>Shareable state: the address bar always links to the exact comparison on screen.</li>
-          </ul>
           <p class="about-links">
             <a href="https://www.linkedin.com/in/ayman-khayat-350b4b335" target="_blank" rel="noopener">Ayman on LinkedIn</a>
             <a href="https://github.com/aymankhayat/dyno-compare" target="_blank" rel="noopener">Source code on GitHub</a>
           </p>
+        </div>
+        <div class="glass about-card">
+          <h3>What it demonstrates</h3>
+          <ul>
+            <li>Data integrity: every figure links to the manufacturer document it came from, and the lineup only includes cars whose makers publish every figure shown.</li>
+            <li>A 3D showroom built from code with three.js: body shapes generated from side profiles, orbit controls, spec hotspots and live paint changes.</li>
+            <li>Explanations generated from the cars being compared, so they quote this comparison’s own numbers.</li>
+            <li>Unit conversions checked by automated tests against reference values (60&nbsp;mph = 96.6&nbsp;km/h, 300&nbsp;hp = 224&nbsp;kW).</li>
+            <li>Shareable state: the address bar always links to the exact comparison on screen.</li>
+          </ul>
         </div>
       </div>
     </section>
   </main>
 
   <footer class="footer">
-    <p>Specs last checked <time data-checked></time>. US-market models; figures are the manufacturers’ own, stored in US units and converted to metric in the browser. 0–60 times are manufacturer claims.</p>
+    <p>Specs last checked <time data-checked></time>. US-market models; figures are the manufacturers’ own, stored in US units and converted to metric in the browser. The 3D models are stylized body shapes, not replicas, and not to scale.</p>
     <p><a href="tests.html">Run the unit and data tests</a></p>
   </footer>
 </body>

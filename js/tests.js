@@ -1,6 +1,6 @@
 // Browser-run tests: open tests.html. Results are also exposed on window.__TESTS__.
 import * as U from './units.js';
-import { CARS, CAR_BY_ID, SIGNATURES, CHECKED } from './data.js';
+import { CARS, CAR_BY_ID, SIGNATURES, CHECKED, BODY_STYLES } from './data.js';
 import { parseState, serializeState, matchSignature, defaultCars } from './state.js';
 import { SCALES } from './gauges.js';
 import { buildTradeoffs } from './tradeoffs.js';
@@ -77,6 +77,17 @@ test('Every published figure cites a source; every missing one explains why', ()
     }
   }
 });
+test('No figure in the lineup is unverified or blank', () => {
+  for (const c of CARS) {
+    for (const key of ['hp', 'torque', 'weight', 'zero60', 'top']) ok(c[key].v != null, `${c.id}.${key} is blank`);
+  }
+});
+test('Every car has a 3D body style the showroom can build', () => {
+  for (const c of CARS) ok(BODY_STYLES.includes(c.style), `${c.id}: ${c.style}`);
+});
+test('Every signature run has a wordmark', () => {
+  for (const s of SIGNATURES) ok(typeof s.word === 'string' && s.word.length > 0, s.id);
+});
 test('Every car has the text specs the sheet shows', () => {
   for (const c of CARS) for (const k of ['drivetrain', 'powertrain', 'engine', 'transmission', 'transType']) ok(c[k], `${c.id}.${k}`);
 });
@@ -89,9 +100,9 @@ test('Every catalog value fits on its gauge scale in both unit systems', () => {
     }
   }
 });
-test('Signature runs reference real cars and include a Toyota hybrid', () => {
+test('Signature runs reference real cars and include a hybrid', () => {
   for (const s of SIGNATURES) for (const id of s.cars) ok(CAR_BY_ID.has(id), `${s.id}: ${id}`);
-  ok(SIGNATURES.some((s) => s.cars.some((id) => CAR_BY_ID.get(id).make === 'Toyota' && CAR_BY_ID.get(id).powertrain === 'Hybrid')), 'no Toyota hybrid');
+  ok(SIGNATURES.some((s) => s.cars.some((id) => CAR_BY_ID.get(id).powertrain === 'Hybrid')), 'no hybrid');
 });
 
 // --- URL state ---
@@ -103,7 +114,7 @@ test('URL state round-trips', () => {
   eq(JSON.stringify(back), JSON.stringify(s));
 });
 test('Three-car links keep all three cars', () =>
-  eq(parseState('?cars=toyota-prius,honda-civic-hybrid,honda-civic-sport').cars.length, 3));
+  eq(parseState('?cars=toyota-gr86,toyota-gr-supra,toyota-gr-corolla').cars.length, 3));
 test('Unknown car ids fall back to the default run', () =>
   eq(parseState('?cars=nope,also-nope').cars.join(), defaultCars().join()));
 test('Defaults are imperial with explanations on', () => {
@@ -134,7 +145,7 @@ test('Any pairing renders trade-offs without undefined or NaN', () => {
   }
 });
 test('Turbo vs NA explanation appears when aspiration differs', () => {
-  const out = buildTradeoffs([CAR_BY_ID.get('ford-mustang-gt'), CAR_BY_ID.get('ford-mustang-ecoboost')], 'imperial', null);
+  const out = buildTradeoffs([CAR_BY_ID.get('toyota-gr86'), CAR_BY_ID.get('bmw-m3')], 'imperial', null);
   ok(out.some((o) => o.id === 'aspiration'), 'missing aspiration section');
 });
 
