@@ -408,3 +408,26 @@ export function buildCar(key, { dims, paint = '#9fd3c7', accent = '#6cf0c2' } = 
     },
   };
 }
+
+// Contact shadow and slot-colored underglow for any car group (used by real GLB models).
+export function groundEffects(group, L, W, accent) {
+  shadowTex ??= radialTexture('rgba(0,0,0,0.85)', 'rgba(0,0,0,0)');
+  glowTex ??= radialTexture('rgba(255,255,255,0.9)', 'rgba(255,255,255,0)');
+  const shadowMat = new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false });
+  const glowMat = new THREE.MeshBasicMaterial({ map: glowTex, color: accent, transparent: true, opacity: 0.32, depthWrite: false, blending: THREE.AdditiveBlending });
+  const shadow = new THREE.Mesh(new THREE.PlaneGeometry(L * 1.25, W * 1.9), shadowMat);
+  const glow = new THREE.Mesh(new THREE.PlaneGeometry(L * 1.6, W * 2.6), glowMat);
+  shadow.rotation.x = glow.rotation.x = -Math.PI / 2;
+  shadow.position.y = 0.004;
+  glow.position.y = 0.003;
+  group.add(glow, shadow);
+  return {
+    setAccent(hex) { glowMat.color.set(hex); },
+    dispose() {
+      shadow.geometry.dispose();
+      glow.geometry.dispose();
+      shadowMat.dispose();
+      glowMat.dispose();
+    },
+  };
+}

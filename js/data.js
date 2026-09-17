@@ -184,6 +184,37 @@ export const CARS = [
 
 export const CAR_BY_ID = new Map(CARS.map((c) => [c.id, c]));
 
+// Real 3D models from Sketchfab, used under their authors' licenses with credit.
+// Keyed by `model3d`. Files are compressed copies of the originals; `yaw` turns a
+// file so its nose points the way the stage expects.
+export const MODEL_FILES = {
+  gr86: {
+    file: 'assets/cars/gr86.glb', title: '2022 Toyota GR86', author: 'ddiaz-design',
+    url: 'https://sketchfab.com/3d-models/2724aadbf88b4706a26cf7d1b2332d0c', license: 'CC BY-NC-SA 4.0', yaw: 180,
+  },
+  supra: {
+    file: 'assets/cars/supra.glb', title: 'Toyota GR Supra', author: '0verly',
+    url: 'https://sketchfab.com/3d-models/371c9c1ded6440699b7c261c0fb82a2c', license: 'CC BY-NC 4.0', yaw: 180,
+  },
+  grcorolla: {
+    file: 'assets/cars/grcorolla.glb', title: '2023 Toyota GR Corolla', author: 'srineshchethiya',
+    url: 'https://sketchfab.com/3d-models/204283fa663d4ccea7f3bdfd1ba6680e', license: 'CC BY 4.0', yaw: 0,
+  },
+  m3: {
+    file: 'assets/cars/m3.glb', title: '2021 BMW M3 Competition (G80)', author: 'supercarmodels',
+    url: 'https://sketchfab.com/3d-models/a9027a26b7ee4da4b564d939b6c27559', license: 'CC BY 4.0', yaw: 0,
+  },
+  p911: {
+    file: 'assets/cars/p911.glb', title: '2022 Porsche 911 GT3 Touring (992)', author: 'ddiaz-design',
+    url: 'https://sketchfab.com/3d-models/a76364a3d50c4d78912a28250cb57be5', license: 'CC BY-NC-SA 4.0', yaw: 180,
+    note: 'A 992 GT3 Touring body stands in for the Carrera and Carrera GTS, which share its silhouette.',
+  },
+  ioniq5n: {
+    file: 'assets/cars/ioniq5n.glb', title: '2024 Hyundai Ioniq 5 N', author: 'ddiaz-design',
+    url: 'https://sketchfab.com/3d-models/8d16325eb7974a948627b3cd77f30f52', license: 'CC BY-NC 4.0', yaw: 180,
+  },
+};
+
 export const MAKES = [...new Set(CARS.map((c) => c.make))];
 
 // Signature runs: each isolates one engineering trade-off. `covers` lists the

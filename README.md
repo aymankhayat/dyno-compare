@@ -2,13 +2,13 @@
 
 A 3D showroom for comparing performance cars side by side: drag the cars around, tap spec hotspots, read every figure on a spec sheet that links to its manufacturer source, and get a plain-language explanation of the engineering trade-offs behind the numbers.
 
-**[Live Demo](https://aymankhayat.github.io/dyno-compare/)** · **[Case study](CASE_STUDY.md)** · 9 cars · 45 manufacturer figures from 11 documents · 31 automated tests
+**[Live Demo](https://aymankhayat.github.io/dyno-compare/)** · **[Case study](CASE_STUDY.md)** · 9 cars · 45 manufacturer figures from 11 documents · 32 automated tests
 
 ![Screenshot](docs/screenshot.png)
 
 ## Features
 
-- **3D showroom built in code:** every car is modeled by hand in three.js from its own silhouette and sized from the maker's published length, width, height and wheelbase, so the lineup is to scale. Each model carries its signature details: the 911's round headlights and full-width light bar, the M3's kidney grille, the GR Corolla's roof wing and three exhaust tips, and the IONIQ 5 N's pixel lights. Each car is shown in its own standout color. Drag to orbit, watch the drive-in animation when the lineup changes, and tap spec hotspots pinned to each model.
+- **3D showroom with real car models:** each car is a credited Sketchfab model, compressed for mobile and turned, scaled to the maker's published length and set on the floor in code (`js/realcars.js`), so the lineup is to scale. If a model file can't load, a built-in shape made in code (`js/carmodels.js`) stands in. Drag to orbit, watch the drive-in animation when the lineup changes, and tap spec hotspots pinned to each model.
 - **Three signature runs** load first, each isolating one trade-off:
   - **Hybrid vs gas:** Porsche 911 Carrera vs 911 Carrera GTS T-Hybrid. An electric turbo and a PDK-integrated motor used to kill turbo lag, contrasted with Toyota's power-split hybrid system from a hybrid-diagnostics point of view.
   - **Turbo vs naturally aspirated:** Toyota GR86 vs GR Supra 3.0.
@@ -27,7 +27,20 @@ Plain HTML, CSS and JavaScript (ES modules), with no build step. three.js 0.186 
 
 ## Engineering notes
 
-Four real problems from building this, each with what it measured out to, are written up in **[CASE_STUDY.md](CASE_STUDY.md)**: cutting the lineup from 18 to 9 cars so all 45 figures are published, checking conversions against Toyota's own numbers, modeling 6 cars in 19 KB of code, and keeping a WebGL stage from trapping mobile scrolling.
+Four real problems from building this, each with what it measured out to, are written up in **[CASE_STUDY.md](CASE_STUDY.md)**: cutting the lineup from 18 to 9 cars so all 45 figures are published, checking conversions against Toyota's own numbers, shrinking 6 real car models from 135 MB to 19 MB, and keeping a WebGL stage from trapping mobile scrolling.
+
+## 3D model credits
+
+Models are used under their authors' Creative Commons licenses, compressed with gltf-transform (meshopt, WebP textures) and scaled in code. They are community models, not official manufacturer data. NonCommercial licenses apply to this personal portfolio project.
+
+| Used for | Model | Author | License |
+| --- | --- | --- | --- |
+| GR86 | [2022 Toyota GR86](https://sketchfab.com/3d-models/2724aadbf88b4706a26cf7d1b2332d0c) | ddiaz-design | CC BY-NC-SA 4.0 |
+| GR Supra | [Toyota GR Supra](https://sketchfab.com/3d-models/371c9c1ded6440699b7c261c0fb82a2c) | 0verly | CC BY-NC 4.0 |
+| GR Corolla | [2023 Toyota GR Corolla](https://sketchfab.com/3d-models/204283fa663d4ccea7f3bdfd1ba6680e) | srineshchethiya | CC BY 4.0 |
+| M3, M3 Competition, M3 Competition M xDrive | [2021 BMW M3 Competition (G80)](https://sketchfab.com/3d-models/a9027a26b7ee4da4b564d939b6c27559) | supercarmodels | CC BY 4.0 |
+| 911 Carrera, 911 Carrera GTS T-Hybrid | [2022 Porsche 911 GT3 Touring (992)](https://sketchfab.com/3d-models/a76364a3d50c4d78912a28250cb57be5) | ddiaz-design | CC BY-NC-SA 4.0 |
+| IONIQ 5 N | [2024 Hyundai Ioniq 5 N](https://sketchfab.com/3d-models/8d16325eb7974a948627b3cd77f30f52) | ddiaz-design | CC BY-NC 4.0 |
 
 ## Data methodology
 
@@ -54,6 +67,6 @@ Open `http://localhost:3000`, and `/tests.html` to run the tests in the browser.
 
 ## About
 
-Built by [Ayman Khayat](https://www.linkedin.com/in/ayman-khayat-350b4b335), a mechanical engineering student, drawing on a Toyota dealership internship in hybrid powertrain diagnostics. The 3D cars are hand-built approximations of each model's shape, not official manufacturer models.
+Built by [Ayman Khayat](https://www.linkedin.com/in/ayman-khayat-350b4b335), a mechanical engineering student, drawing on a Toyota dealership internship in hybrid powertrain diagnostics. The 3D cars are credited community models (see above), not official manufacturer models.
 
 MIT licensed.

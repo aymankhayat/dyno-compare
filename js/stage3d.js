@@ -4,8 +4,9 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { buildCar } from './carmodels.js';
+import { loadRealCar } from './realcars.js';
 
-const SPACING = 2.7;
+const SPACING = 3.1;
 // Aim above the cars so they sit in the lower half of the stage, under the wordmark.
 const TARGET_Y = 1.15;
 const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -121,15 +122,29 @@ export function createStage({ canvas, overlay, onHotspot, onFocus }) {
     });
   }
 
+  let generation = 0;
+
   function setCars(entries, { animate = true } = {}) {
     cars.forEach(({ car }) => { scene.remove(car.group); car.dispose(); });
     const n = entries.length;
+    const gen = ++generation;
     cars = entries.map((entry, i) => {
       const car = buildCar(entry.model, { dims: entry.dims, paint: entry.paint, accent: entry.accent });
       const z = slotZ(i, n);
       car.group.position.set(0, 0, z);
       scene.add(car.group);
       return { car, entry, z, from: animate && !reduceMotion() ? 16 + i * 3 : 0 };
+    });
+    // Swap in the real model for each car once its file loads; the built-in shape stays if it can't.
+    cars.forEach((slot) => {
+      loadRealCar(slot.entry.model, { dims: slot.entry.dims, accent: slot.entry.accent }).then((real) => {
+        if (!real || gen !== generation || !cars.includes(slot)) { real?.dispose(); return; }
+        real.group.position.copy(slot.car.group.position);
+        scene.remove(slot.car.group);
+        slot.car.dispose();
+        slot.car = real;
+        scene.add(real.group);
+      });
     });
     driveStart = performance.now();
     focused = Math.min(focused, n - 1);

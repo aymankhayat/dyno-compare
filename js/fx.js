@@ -1,6 +1,20 @@
 // Portfolio layer: live-data ticker, KPI numbers, scroll reveal and the hero's cursor light.
 // Numbers come from js/data.js so the page can't drift from the data.
-import { CARS, SIGNATURES } from './data.js';
+import { CARS, SIGNATURES, MODEL_FILES } from './data.js';
+
+// 3D model credits: list only the model files that are actually deployed.
+const creditsEl = document.getElementById('model-credits');
+if (creditsEl) {
+  Promise.all(Object.values(MODEL_FILES).map((m) =>
+    fetch(m.file, { method: 'HEAD' }).then((r) => (r.ok ? m : null)).catch(() => null)))
+    .then((found) => {
+      const used = found.filter(Boolean);
+      if (!used.length) return;
+      creditsEl.innerHTML = `3D models: ${used.map((m) =>
+        `<a href="${m.url}" target="_blank" rel="noopener">${m.title}</a> by ${m.author} (${m.license})`).join('; ')}. Models are scaled to each car’s published length and are close stand-ins, not official manufacturer data.`;
+      creditsEl.hidden = false;
+    });
+}
 
 document.documentElement.classList.add('js');
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;

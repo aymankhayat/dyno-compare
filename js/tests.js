@@ -1,6 +1,6 @@
 // Browser-run tests: open tests.html. Results are also exposed on window.__TESTS__.
 import * as U from './units.js';
-import { CARS, CAR_BY_ID, SIGNATURES, CHECKED, MODELS_3D } from './data.js';
+import { CARS, CAR_BY_ID, SIGNATURES, CHECKED, MODELS_3D, MODEL_FILES } from './data.js';
 import { parseState, serializeState, matchSignature, defaultCars } from './state.js';
 import { SCALES } from './gauges.js';
 import { buildTradeoffs } from './tradeoffs.js';
@@ -89,6 +89,13 @@ test('Every car has a 3D model sized from published dimensions', () => {
     ok(d && d.L > d.wb && d.W > 60 && d.W < 90 && d.H > 40 && d.H < 80, `${c.id}: implausible dimensions`);
     ok(Number.isInteger(d.s) && c.sources[d.s], `${c.id}: dimensions have no source`);
     ok(/^#[0-9a-f]{6}$/i.test(c.paint), `${c.id}: paint`);
+  }
+});
+test('Every real 3D model file is credited with author, license and link', () => {
+  for (const c of CARS) ok(MODEL_FILES[c.model3d], `${c.id}: no model file entry for ${c.model3d}`);
+  for (const [k, m] of Object.entries(MODEL_FILES)) {
+    ok(m.file.startsWith('assets/cars/') && m.file.endsWith('.glb'), `${k}: file path`);
+    ok(m.author && m.title && /^CC BY/.test(m.license) && m.url.startsWith('https://sketchfab.com/'), `${k}: credit incomplete`);
   }
 });
 test('Every signature run has a wordmark', () => {

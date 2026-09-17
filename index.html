@@ -166,8 +166,8 @@
         </figure>
         <div class="split-copy" data-reveal>
           <p class="eyebrow">3D showroom</p>
-          <h2 id="split-1-h">Modeled from published dimensions</h2>
-          <p>Six body designs are traced by hand from each car’s silhouette and built in code with three.js, then sized from the maker’s length, width, height and wheelbase. The lineup parks to scale, with details like the 911’s round headlights and the GR Corolla’s three exhaust tips.</p>
+          <h2 id="split-1-h">Real cars, sized from published data</h2>
+          <p>Each car is a real 3D model by a Sketchfab artist, compressed from up to 46&nbsp;MB to a few MB and scaled in code to the maker’s published length, so the lineup parks to scale. Every artist is credited at the bottom of the page.</p>
           <a class="btn-pill" href="#top">Know more <span aria-hidden="true">→</span></a>
         </div>
       </div>
@@ -225,9 +225,9 @@
             <p>All data is stored in published US units and converted in one module. Tests pin the reference values (60&nbsp;mph = 96.6&nbsp;km/h, 300&nbsp;hp = 224&nbsp;kW) and cross-check derived figures against numbers Toyota prints itself, like the GR Supra’s weight-to-power ratio.</p>
           </article>
           <article class="enote" data-reveal>
-            <p class="enote-metric"><b><span data-kpi="models">6</span></b> models in <b>19&nbsp;KB</b> of code, <b>0</b> model files</p>
-            <h3>Cars modeled in code, to scale</h3>
-            <p>The first 3D pass extruded generic body styles and looked nothing like the real cars. Each model is now a traced silhouette sized from published length, width, height and wheelbase. One honest gap: Porsche’s US site lists no 911 height, so those two models use a third-party figure, noted in the code.</p>
+            <p class="enote-metric"><b>135&nbsp;MB → 19&nbsp;MB</b> for <b><span data-kpi="models">6</span></b> real car models</p>
+            <h3>Real car models that load on a phone</h3>
+            <p>Two passes of cars built in code never looked like the real ones, so each is now a licensed Sketchfab model, compressed with meshopt geometry and WebP textures, then turned and scaled in code to the maker’s published length. Mesh simplification dented the GR Corolla’s body panels, so it was switched off. Only the cars on screen are downloaded.</p>
           </article>
           <article class="enote" data-reveal>
             <p class="enote-metric"><b>0&nbsp;px</b> horizontal overflow at <b>375&nbsp;px</b></p>
@@ -246,7 +246,7 @@
         <div><dt>Source documents</dt><dd data-kpi="sources">11</dd></div>
         <div><dt>3D models</dt><dd data-kpi="models">6</dd></div>
         <div><dt>Signature runs</dt><dd data-kpi="runs">3</dd></div>
-        <div><dt>Automated tests</dt><dd>31</dd></div>
+        <div><dt>Automated tests</dt><dd>32</dd></div>
       </dl>
     </section>
 
@@ -281,7 +281,7 @@
           <h3>What it demonstrates</h3>
           <ul>
             <li>Data integrity: every figure links to the manufacturer document it came from, and the lineup only includes cars whose makers publish every figure shown.</li>
-            <li>A 3D showroom built from code with three.js: each car modeled by hand from its own silhouette and sized from its published dimensions, with orbit controls and spec hotspots.</li>
+            <li>A three.js showroom with real, credited 3D car models, compressed for mobile and scaled in code to each car’s published length, with orbit controls and spec hotspots.</li>
             <li>Explanations generated from the cars being compared, so they quote this comparison’s own numbers.</li>
             <li>Unit conversions checked by automated tests against reference values (60&nbsp;mph = 96.6&nbsp;km/h, 300&nbsp;hp = 224&nbsp;kW).</li>
             <li>Shareable state: the address bar always links to the exact comparison on screen.</li>
@@ -293,7 +293,8 @@
 
   <footer class="footer">
     <p class="credit">Designed &amp; built by <a href="https://www.linkedin.com/in/ayman-khayat-350b4b335" target="_blank" rel="noopener">Ayman Khayat</a></p>
-    <p>Specs last checked <time data-checked></time>. US-market models; figures are the manufacturers’ own, stored in US units and converted to metric in the browser. Each 3D model is hand-traced from the car’s silhouette and sized from the maker’s published dimensions; they’re close approximations, not official models. All images on this page are real renders of the site.</p>
+    <p>Specs last checked <time data-checked></time>. US-market models; figures are the manufacturers’ own, stored in US units and converted to metric in the browser. The 3D cars are community models from Sketchfab (credited below), scaled to each maker’s published length; they are not official manufacturer models, and the two 911s share a 992 GT3 Touring body. All images on this page are real renders of the site.</p>
+    <p id="model-credits" class="model-credits" hidden></p>
     <p><a href="tests.html">Run the unit and data tests</a></p>
   </footer>
 </body>
