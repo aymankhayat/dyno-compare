@@ -63,6 +63,8 @@ function renderStageCopy() {
   // Headline with a gradient on everything after "vs" (titles and names come from data.js).
   const [lead, ...rest] = (sig ? sig.title : cs.map((c) => c.short).join(' vs ')).split(' vs ');
   $('#stage-title').innerHTML = rest.length ? `${lead} <span class="grad">vs ${rest.join(' vs ')}</span>` : lead;
+  // Custom lineups produce long titles; set them smaller so they don't run into the stage buttons.
+  $('#stage-title').classList.toggle('long', !sig);
   $('#stage-hook').textContent = sig ? sig.hook : cs.map(fullName).join(', ');
   $('#wordmark').textContent = sig ? sig.word : 'Versus';
   fitWordmark();

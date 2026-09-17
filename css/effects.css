@@ -48,6 +48,7 @@ html, body { overflow-x: clip; }
   transition: background 0.2s;
 }
 .stage-copy h1 { font-size: clamp(1.9rem, 4.2vw, 3.4rem); }
+.stage-copy h1.long { font-size: clamp(1.35rem, 2.3vw, 2rem); line-height: 1.12; }
 .grad {
   background: linear-gradient(90deg, var(--glacier), var(--boost) 55%, var(--redline));
   -webkit-background-clip: text; background-clip: text; color: transparent;
