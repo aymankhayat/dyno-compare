@@ -4,6 +4,9 @@ import { createGauge, SCALES } from './gauges.js';
 import { buildTradeoffs } from './tradeoffs.js';
 import { convert, format, unit, powerToWeight, weightPerPower, averageG, round } from './units.js';
 
+// ?clean hides the interface over the 3D stage, for capturing clean renders of the showroom.
+if (new URLSearchParams(location.search).has('clean')) document.documentElement.classList.add('clean');
+
 const state = parseState(location.search);
 const LETTERS = ['A', 'B', 'C'];
 const ACCENTS = ['#6cf0c2', '#5ab8ff', '#ff7a9a'];
@@ -57,7 +60,9 @@ function renderStageCopy() {
   const cs = cars();
   const sig = matchSignature(state.cars);
   $('#stage-kicker').textContent = sig ? 'Signature run' : 'Your comparison';
-  $('#stage-title').textContent = sig ? sig.title : cs.map((c) => c.short).join(' vs ');
+  // Headline with a gradient on everything after "vs" (titles and names come from data.js).
+  const [lead, ...rest] = (sig ? sig.title : cs.map((c) => c.short).join(' vs ')).split(' vs ');
+  $('#stage-title').innerHTML = rest.length ? `${lead} <span class="grad">vs ${rest.join(' vs ')}</span>` : lead;
   $('#stage-hook').textContent = sig ? sig.hook : cs.map(fullName).join(', ');
   $('#wordmark').textContent = sig ? sig.word : 'Versus';
   fitWordmark();

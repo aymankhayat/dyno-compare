@@ -467,3 +467,6 @@ button.add { justify-self: start; }
 @media (prefers-reduced-motion: reduce) {
   .needle, .arc, .run, .switch .track::after { transition: none; }
 }
+
+/* Render mode (?clean): only the cars and the studio, for capturing images. */
+.clean .nav, .clean .stage-copy, .clean .stage-card, .clean .stage-bar, .clean .car-tag, .clean .wordmark, .clean .runs-sec { visibility: hidden; }

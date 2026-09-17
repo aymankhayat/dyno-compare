@@ -2,7 +2,7 @@
 
 A 3D showroom for comparing performance cars side by side: drag the cars around, tap spec hotspots, read every figure on a spec sheet that links to its manufacturer source, and get a plain-language explanation of the engineering trade-offs behind the numbers.
 
-**[Live Demo](https://aymankhayat.github.io/dyno-compare/)**
+**[Live Demo](https://aymankhayat.github.io/dyno-compare/)** · **[Case study](CASE_STUDY.md)** · 9 cars · 45 manufacturer figures from 11 documents · 31 automated tests
 
 ![Screenshot](docs/screenshot.png)
 
@@ -19,10 +19,15 @@ A 3D showroom for comparing performance cars side by side: drag the cars around,
 - **Explain the trade-offs toggle:** turns the generated explanations on or off.
 - **Shareable links:** the URL always encodes the comparison on screen, e.g. `?cars=toyota-gr86,toyota-gr-supra&units=metric`.
 - **Mobile layout:** compact gauge rows, a swipeable run carousel, and opt-in rotation so the 3D stage never traps page scrolling.
+- **Portfolio layer:** film grain, tachometer-style glowing rings, a live-data ticker and KPI strip computed from `js/data.js`, story sections using real renders of the site, Engineering Notes and an Open Graph share card. Motion respects `prefers-reduced-motion`.
 
 ## Tech stack
 
-Plain HTML, CSS and JavaScript (ES modules), with no build step. three.js 0.186 is loaded from jsDelivr through an import map, and the 3D stage loads lazily, so the rest of the page works even without WebGL. Gauges are hand-built SVG. Fonts are Unbounded, Barlow and Barlow Condensed. The site is hosted on GitHub Pages.
+Plain HTML, CSS and JavaScript (ES modules), with no build step. three.js 0.186 is loaded from jsDelivr through an import map, and the 3D stage loads lazily, so the rest of the page works even without WebGL. Gauges are hand-built SVG. Fonts are Unbounded, Barlow, Barlow Condensed and JetBrains Mono. The site is hosted on GitHub Pages. All images are real renders of the site (`assets/`); the share card is rendered from `docs/og-card.html`.
+
+## Engineering notes
+
+Four real problems from building this, each with what it measured out to, are written up in **[CASE_STUDY.md](CASE_STUDY.md)**: cutting the lineup from 18 to 9 cars so all 45 figures are published, checking conversions against Toyota's own numbers, modeling 6 cars in 19 KB of code, and keeping a WebGL stage from trapping mobile scrolling.
 
 ## Data methodology
 
@@ -42,6 +47,8 @@ There's no install and no build. Serve the folder with any static server, since 
 ```bash
 npx serve .
 ```
+
+Add `?clean` to any comparison URL to hide the interface over the 3D stage, which is how the images in `assets/` were captured.
 
 Open `http://localhost:3000`, and `/tests.html` to run the tests in the browser. No environment variables are needed.
 

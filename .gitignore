@@ -7,3 +7,6 @@ build/
 .DS_Store
 Thumbs.db
 desktop.ini
+.agents/
+skills-lock.json
+.claude/
