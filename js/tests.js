@@ -4,6 +4,8 @@ import { CARS, CAR_BY_ID, SIGNATURES, CHECKED, MODELS_3D, MODEL_FILES } from './
 import { parseState, serializeState, matchSignature, defaultCars } from './state.js';
 import { SCALES } from './gauges.js';
 import { buildTradeoffs } from './tradeoffs.js';
+import { REGIONS, REGION_KEYS, FAMILIES, FACTORS, SOURCES, SPEC_LINKS, COST_CHECKED } from './costdata.js';
+import { results as costResults, breakEven, perGallon, carryOver, L_PER_GAL } from './costmodel.js';
 
 const results = [];
 
@@ -124,7 +126,8 @@ test('URL state round-trips', () => {
   const q = serializeState(s);
   eq(q, '?cars=toyota-gr86,toyota-gr-supra&units=metric&explain=off');
   const back = parseState(q);
-  eq(JSON.stringify(back), JSON.stringify(s));
+  eq(JSON.stringify([back.cars, back.units, back.explain]), JSON.stringify([s.cars, s.units, s.explain]));
+  eq(back.mode, 'spec', 'spec links stay in Spec Comparison');
 });
 test('Three-car links keep all three cars', () =>
   eq(parseState('?cars=toyota-gr86,toyota-gr-supra,toyota-gr-corolla').cars.length, 3));
@@ -160,6 +163,93 @@ test('Any pairing renders trade-offs without undefined or NaN', () => {
 test('Turbo vs NA explanation appears when aspiration differs', () => {
   const out = buildTradeoffs([CAR_BY_ID.get('toyota-gr86'), CAR_BY_ID.get('bmw-m3')], 'imperial', null);
   ok(out.some((o) => o.id === 'aspiration'), 'missing aspiration section');
+});
+
+// --- Cost & Emissions ---
+const cost = (over = {}) => ({ region: 'us', fam: 'toyota', mi: 12000, yrs: 8, batt: true, fr: null, fp: null, el: null, gr: null, p: [], i: [], ...over });
+const byPt = (R, pt) => R.rows.find((r) => r.v.pt === pt);
+
+test('Scenario: 25,000 mi a year in the UK (high fuel price) clearly favors the EV and hybrid', () => {
+  const R = costResults(cost({ region: 'uk', mi: 25000 }));
+  const [ice, hyb, ev] = ['ICE', 'Hybrid', 'EV'].map((p) => byPt(R, p));
+  ok(ev.tco < ice.tco * 0.85 && hyb.tco < ice.tco * 0.9, `EV ${ev.tco.toFixed(0)}, hybrid ${hyb.tco.toFixed(0)}, gas ${ice.tco.toFixed(0)}`);
+  eq(R.cheapest.v.pt, 'EV', 'cheapest');
+  eq(R.cleanest.v.pt, 'EV', 'cleanest');
+});
+test('Scenario: Saudi Arabia (cheap capped fuel, oil and gas grid) does not favor the EV', () => {
+  const R = costResults(cost({ region: 'sa' }));
+  ok(R.cheapest.v.pt !== 'EV', 'EV should not be cheapest');
+  ok(byPt(R, 'Hybrid').lifeKg < byPt(R, 'EV').lifeKg, 'hybrid should beat the EV on lifetime CO2 on a 692 g/kWh grid');
+  ok(byPt(R, 'EV').lifeKg < byPt(R, 'ICE').lifeKg, 'EV still beats the gas car');
+});
+test('Scenario: 5,000 mi a year for 5 years in the US favors the cheaper gas car', () => {
+  const R = costResults(cost({ mi: 5000, yrs: 5 }));
+  eq(R.cheapest.v.pt, 'ICE', 'cheapest');
+  const be = R.costBE.find((b) => b.to.v.pt === 'EV');
+  ok(be.miles > 25000, `EV break-even ${be.miles} should be past the 25,000 mi owned`);
+});
+test('Scenario: UAE preset uses AED and the dirham peg', () => {
+  const R = costResults(cost({ region: 'uae' }));
+  eq(R.s.region.currency, 'AED');
+  near(R.s.prices[0], 23325 * 3.6725, 1, 'converted MSRP');
+  near(R.s.regular, 3.69 * L_PER_GAL, 1e-9, 'AED per gallon');
+  ok(R.s.premium > R.s.regular, 'Super 98 costs more than Special 95');
+});
+test('Break-even is where the two cost lines meet', () => {
+  near(breakEven(20000, 0.2, 30000, 0.1), 100000, 1e-6);
+  eq(breakEven(20000, 0.1, 30000, 0.2), null, 'never');
+  eq(breakEven(20000, 0.1, 30000, 0.1), null, 'parallel');
+  const R = costResults(cost());
+  for (const b of R.costBE.filter((x) => x.miles)) {
+    near(b.from.upfront + b.from.perMile * b.miles, b.to.upfront + b.to.perMile * b.miles, 0.01, b.to.v.id);
+  }
+});
+test('EV emissions come from the local grid, never zero', () => {
+  for (const k of REGION_KEYS) {
+    const ev = byPt(costResults(cost({ region: k })), 'EV');
+    near(ev.co2, (25.5044 / 100) * REGIONS[k].grid.v, 1e-9, k);
+    ok(ev.co2 > 0 && ev.upfrontKg > 0, `${k}: zero`);
+  }
+});
+test('Gasoline CO2 is 8,887 g per gallon ÷ mpg', () => near(byPt(costResults(cost()), 'ICE').co2, 8887 / 34, 1e-9));
+test('Litre prices convert to per-gallon correctly', () => near(perGallon({ v: 1, unit: 'L' }), 3.785411784, 1e-12));
+test('Every cost default carries a source or an illustrative label', () => {
+  ok(/^\d{4}-\d{2}-\d{2}$/.test(COST_CHECKED), 'COST_CHECKED');
+  for (const [k, r] of Object.entries(REGIONS)) {
+    for (const key of ['regular', 'premium', 'elec', 'grid', 'fx']) {
+      const f = r[key];
+      ok(['sourced', 'illustrative'].includes(f.kind), `${k}.${key} kind`);
+      if (f.src) ok(SOURCES[f.src]?.url.startsWith('https://'), `${k}.${key} source`);
+      else ok(k === 'us' && key === 'fx', `${k}.${key} has no source`);
+      ok(f.v > 0, `${k}.${key} value`);
+    }
+  }
+  for (const f of FAMILIES) for (const v of f.variants) {
+    ok(SOURCES[v.price.src], `${v.id} price source`);
+    ok(v.pt === 'EV' ? v.kwh100.v > 0 && v.batteryKwh > 0 : v.mpg.v > 0, `${v.id} efficiency`);
+  }
+  for (const f of [FACTORS.gasCo2PerGal, FACTORS.batteryKgPerKwh, ...Object.values(FACTORS.maint)]) ok(SOURCES[f.src], 'factor source');
+  ok(REGION_KEYS.some((k) => REGIONS[k].gulf), 'Gulf preset');
+});
+test('Cost URL state round-trips, and spec links are unchanged', () => {
+  const s = parseState('?cars=toyota-gr86,toyota-gr-supra&mode=cost&region=uae&fam=hyundai&mi=20000&yrs=5&batt=0&el=0.4&p=,32000&i=,,5000');
+  eq(s.mode, 'cost');
+  eq(JSON.stringify([s.cost.region, s.cost.fam, s.cost.mi, s.cost.yrs, s.cost.batt, s.cost.el, s.cost.p, s.cost.i]),
+    JSON.stringify(['uae', 'hyundai', 20000, 5, false, 0.4, [null, 32000], [null, null, 5000]]));
+  eq(serializeState(s), '?cars=toyota-gr86,toyota-gr-supra&mode=cost&region=uae&fam=hyundai&mi=20000&yrs=5&batt=0&el=0.4&p=,32000&i=,,5000');
+  eq(serializeState({ ...s, mode: 'spec' }), '?cars=toyota-gr86,toyota-gr-supra', 'spec URL');
+  eq(serializeState(parseState('?cars=toyota-gr86,toyota-gr-supra&mode=cost')), '?cars=toyota-gr86,toyota-gr-supra&mode=cost', 'defaults omitted');
+});
+test('Spec lineup carries over into Cost & Emissions', () => {
+  const co = carryOver(['porsche-911-carrera', 'porsche-911-carrera-gts']);
+  eq(co.fam, 'porsche');
+  eq(co.variants.join(), '911,911-gts');
+  eq(carryOver(['hyundai-ioniq-5-n', 'bmw-m3']).fam, 'hyundai');
+  eq(carryOver(['toyota-gr86', 'hyundai-ioniq-5-n']).fam, 'hyundai', 'a direct counterpart wins');
+  eq(carryOver(['bmw-m3', 'bmw-m3-competition']), null, 'BMW has no gas/hybrid/EV family');
+  eq(parseState('?cars=toyota-gr86,toyota-gr-supra').cost.fam, 'toyota');
+  eq(parseState('?run=hybrid-ice').cost.fam, 'porsche');
+  for (const id of Object.keys(SPEC_LINKS)) ok(CAR_BY_ID.has(id), `${id} is not a car`);
 });
 
 // --- Render ---

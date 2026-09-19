@@ -3,6 +3,9 @@ import { parseState, serializeState, matchSignature } from './state.js';
 import { createGauge, SCALES } from './gauges.js';
 import { buildTradeoffs } from './tradeoffs.js';
 import { convert, format, unit, powerToWeight, weightPerPower, averageG, round } from './units.js';
+import { carryOver } from './costmodel.js';
+import { FAMILY_BY_ID } from './costdata.js';
+import { createCostView } from './cost.js';
 
 // ?clean hides the interface over the 3D stage, for capturing clean renders of the showroom.
 if (new URLSearchParams(location.search).has('clean')) document.documentElement.classList.add('clean');
@@ -418,14 +421,45 @@ function renderTradeoffs() {
 // Controls and state
 // ---------------------------------------------------------------------------
 
+// Carry the Spec Comparison lineup into Cost & Emissions: a car with gas/hybrid/EV
+// versions picks its family, unless a family was chosen by hand.
+function syncCarry() {
+  const co = carryOver(state.cars);
+  state.cost.carried = co && { ...co, links: co.links.map((l) => ({ name: CAR_BY_ID.get(l.id).short, link: l.link })) };
+  if (!state.cost.famLocked && co && co.fam !== state.cost.fam) {
+    state.cost.fam = co.fam;
+    state.cost.p = [];
+    state.cost.i = [];
+  }
+}
+
 function renderControls() {
-  document.querySelectorAll('[data-units]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.units === state.units)));
+  const cost = state.mode === 'cost';
+  document.body.dataset.mode = state.mode;
+  document.querySelectorAll('[data-mode-btn]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.modeBtn === state.mode)));
+  document.querySelectorAll('[data-units]').forEach((b) => {
+    b.setAttribute('aria-pressed', String(b.dataset.units === state.units));
+    b.textContent = b.dataset.units === 'metric' ? (cost ? 'km' : 'km/h') : (cost ? 'mi' : 'mph');
+  });
   $('#explain').checked = state.explain;
 }
 
+let specReady = false;
+
 function renderAll({ sweep = false } = {}) {
   closeCallout();
+  syncCarry();
   renderControls();
+  if (state.mode === 'cost') {
+    costView.render({ sweep });
+    document.title = `Cost & Emissions: ${FAMILY_BY_ID.get(state.cost.fam).name} | Dyno Compare`;
+    return;
+  }
+  if (!specReady) {
+    specReady = true;
+    sweep = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    initStage();
+  }
   renderStageCopy();
   renderRuns();
   renderSlots();
@@ -452,6 +486,14 @@ document.addEventListener('click', (e) => {
     state.cars = SIGNATURES.find((s) => s.id === run.dataset.run).cars.slice();
     commit({ sweep: true });
     if (window.scrollY > 200) $('#top').scrollIntoView({ block: 'start' });
+    return;
+  }
+  const m = e.target.closest('[data-mode-btn]');
+  if (m) {
+    if (m.dataset.modeBtn === state.mode) return;
+    state.mode = m.dataset.modeBtn;
+    commit({ sweep: !matchMedia('(prefers-reduced-motion: reduce)').matches });
+    window.scrollTo({ top: 0, behavior: 'instant' });
     return;
   }
   const u = e.target.closest('[data-units]');
@@ -485,11 +527,10 @@ document.addEventListener('change', (e) => {
   }
 });
 
-$('#share').addEventListener('click', async () => {
-  const btn = $('#share');
+async function share(btn, status) {
   const done = (msg) => {
-    $('#share-status').textContent = msg;
-    setTimeout(() => { $('#share-status').textContent = ''; }, 2400);
+    status.textContent = msg;
+    setTimeout(() => { status.textContent = ''; }, 2400);
   };
   try {
     if (navigator.share && matchMedia('(pointer: coarse)').matches) {
@@ -502,7 +543,9 @@ $('#share').addEventListener('click', async () => {
     if (err.name !== 'AbortError') done('Copy the link from the address bar');
   }
   btn.blur();
-});
+}
+$('#share').addEventListener('click', () => share($('#share'), $('#share-status')));
+$('#share-cost').addEventListener('click', () => share($('#share-cost'), $('#share-cost-status')));
 
 window.addEventListener('resize', fitWordmark);
 
@@ -512,7 +555,8 @@ document.querySelectorAll('[data-checked]').forEach((el) => {
   el.setAttribute('datetime', CHECKED);
 });
 
+const costView = createCostView({ state, onChange: (opts) => commit(opts) });
+
 history.replaceState(null, '', serializeState(state) + location.hash);
 renderAll({ sweep: !matchMedia('(prefers-reduced-motion: reduce)').matches });
 document.fonts?.ready.then(fitWordmark);
-initStage();

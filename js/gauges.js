@@ -83,7 +83,7 @@ export function createGauge(host, { slots = 3 } = {}) {
 
   let scaleKey = '';
 
-  function drawScale({ max, major, minor }) {
+  function drawScale({ max, major, minor, digits }) {
     scale.replaceChildren();
     const [sx, sy] = polar(84, START);
     const [ex, ey] = polar(84, START + SWEEP);
@@ -99,7 +99,7 @@ export function createGauge(host, { slots = 3 } = {}) {
       if (isMajor) {
         const [tx, ty] = polar(60, a);
         const t = svgEl('text', { x: tx, y: ty + 4, 'text-anchor': 'middle', class: 'dial-num' }, scale);
-        t.textContent = Number.isInteger(v) ? String(v) : v.toFixed(1);
+        t.textContent = digits != null ? v.toFixed(digits) : (Number.isInteger(v) ? String(v) : v.toFixed(1));
       }
     }
   }
@@ -112,7 +112,7 @@ export function createGauge(host, { slots = 3 } = {}) {
   // readouts: [{ name, text (or null for unverified), note }]
   function update({ title, scale: sc, unit, needles: data, readouts, label, sweep = false }) {
     titleEl.textContent = title;
-    const key = `${sc.max}/${sc.major}/${sc.minor}`;
+    const key = `${sc.max}/${sc.major}/${sc.minor}/${sc.digits}`;
     if (key !== scaleKey) {
       drawScale(sc);
       scaleKey = key;

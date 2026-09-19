@@ -1,8 +1,11 @@
 # Dyno Compare
 
-A 3D showroom for comparing performance cars side by side: drag the cars around, tap spec hotspots, read every figure on a spec sheet that links to its manufacturer source, and get a plain-language explanation of the engineering trade-offs behind the numbers.
+A car-comparison tool with two modes:
 
-**[Live Demo](https://aymankhayat.github.io/dyno-compare/)** · **[Case study](CASE_STUDY.md)** · 9 cars · 45 manufacturer figures from 11 documents · 32 automated tests
+- **Spec Comparison:** a 3D showroom for comparing performance cars side by side. Drag the cars around, tap spec hotspots, read every figure on a spec sheet that links to its manufacturer source, and get a plain-language explanation of the engineering trade-offs behind the numbers.
+- **Cost & Emissions:** total cost of ownership and lifetime CO2 for gas, hybrid and electric versions of the same kind of car, using real regional fuel prices, electricity tariffs and grid carbon intensity. It covers the US, UK, UAE and Saudi Arabia, and includes a break-even marker for when the pricier option pays for itself.
+
+**[Live Demo](https://aymankhayat.github.io/dyno-compare/)** · **[Case study](CASE_STUDY.md)** · 9 cars · 45 manufacturer figures from 11 documents · 43 automated tests
 
 ![Screenshot](docs/screenshot.png)
 
@@ -20,6 +23,39 @@ A 3D showroom for comparing performance cars side by side: drag the cars around,
 - **Shareable links:** the URL always encodes the comparison on screen, e.g. `?cars=toyota-gr86,toyota-gr-supra&units=metric`.
 - **Mobile layout:** compact gauge rows, a swipeable run carousel, and opt-in rotation so the 3D stage never traps page scrolling.
 - **Portfolio layer:** film grain, tachometer-style glowing rings, a live-data ticker and KPI strip computed from `js/data.js`, story sections using real renders of the site, Engineering Notes and an Open Graph share card. Motion respects `prefers-reduced-motion`.
+
+## Cost & Emissions mode
+
+- **Mode toggle** in the header. Switching keeps the spec lineup: if a car you compared has gas, hybrid or EV versions (911 Carrera and GTS T-Hybrid, IONIQ 5 N, GR Corolla), its family opens automatically.
+- **Three families:**
+  - Toyota Corolla LE / Corolla Hybrid LE / bZ.
+  - Hyundai Tucson / Tucson Hybrid / IONIQ 5.
+  - Porsche 911 Carrera / 911 GTS T-Hybrid / Taycan.
+
+  Efficiency figures are EPA combined ratings; prices are US MSRPs.
+- **Region presets** set fuel prices, electricity prices, grid carbon intensity and currency. The Gulf presets (UAE and Saudi Arabia) are included because cheap fuel and gas- and oil-fired grids change the answer. Every input can be edited.
+
+  | Region | Fuel | Electricity | Grid (g CO2e/kWh) |
+  | --- | --- | --- | --- |
+  | US | EIA weekly retail, week of 14 Sep 2026 | EIA residential average, June 2026 | Ember 2025: 384 |
+  | UK | DESNZ weekly, 14 Sep 2026 | Ofgem price cap, Oct–Dec 2026 | Ember 2025: 217 |
+  | UAE (Dubai) | UAE Fuel Price Committee, Sep 2026 | DEWA first slab + fuel surcharge + VAT | Ember 2024: 468 |
+  | Saudi Arabia | Aramco capped prices | SERA residential tier + VAT | Ember 2024: 692 |
+
+- **Model** ([`js/costmodel.js`](js/costmodel.js), pure functions):
+  - Total cost = price − incentives + (energy + maintenance) × distance.
+  - Maintenance per mile comes from Argonne National Laboratory (2021).
+  - CO2 uses 8,887 g per gallon of gasoline (EPA) and, for EVs, kWh per mile × the local grid's lifecycle intensity. EVs are never counted as zero-emission.
+  - Battery manufacturing adds 60 kg CO2e per kWh (ICCT 2021), and can be switched off.
+  - Break-even is where two straight cost (or CO2) lines cross.
+- **Sourced vs illustrative:** every default in [`js/costdata.js`](js/costdata.js) is labeled.
+  - *Sourced* figures link to the document they were read from.
+  - *Illustrative* figures are assumptions: default mileage and ownership period, currency-converted US prices, the UK premium fuel price, and hybrid maintenance.
+- **Scenario tests:**
+  - A 25,000 mi/yr UK driver clearly favors the EV and the hybrid.
+  - Saudi Arabia's cheap fuel and 692 g/kWh grid do not favor the EV; the hybrid has the lowest lifetime CO2 there.
+  - A 5,000 mi/yr US driver is cheapest in the gas car.
+- **Shareable state:** e.g. `?mode=cost&region=uk&mi=25000`. Spec-only links are unchanged.
 
 ## Tech stack
 

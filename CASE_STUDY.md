@@ -14,7 +14,7 @@ The goal: a comparison tool where **every number is traceable to the manufacture
 - **Data as the source of truth.** Every figure in `js/data.js` carries an index into that car's list of manufacturer documents. Values are stored in the units the maker publishes and converted to metric in one module (`js/units.js`).
 - **Plain static stack.** HTML, CSS and ES modules, with no build step. three.js is loaded lazily from a CDN, so the page works without WebGL.
 - **Explanations generated from the data.** `js/tradeoffs.js` writes sections from what actually differs between the selected cars (aspiration, drivetrain, transmission, electrification, power-to-weight), plus three hand-written essays for the signature runs.
-- **Tests in the browser.** `tests.html` runs 32 checks on conversions, data integrity, URL state and the trade-off generator.
+- **Tests in the browser.** `tests.html` runs 43 checks on conversions, data integrity, URL state and the trade-off generator.
 
 ## Engineering notes
 
@@ -42,5 +42,5 @@ The goal: a comparison tool where **every number is traceable to the manufacture
 
 - 3 signature runs (hybrid vs gas, turbo vs NA, AWD vs RWD), plus any 2–3 of 9 cars
 - Instrument cluster, sourced spec sheet, generated trade-offs, shareable URLs
-- 32 automated tests passing
+- 43 automated tests passing
 - Portfolio layer: film grain, tachometer rings, live-data ticker, KPI strip. All imagery on the site is real renders of the site itself; no AI-generated images are used.
